@@ -9,6 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.13"
 sqlalchemy = "^2.0.40"
+fntypes = {git = "https://github.com/timoniq/fntypes.git"}
 
 
 [build-system]

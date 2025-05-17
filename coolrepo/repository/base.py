@@ -1,35 +1,37 @@
-import abc
 import typing
+
 import sqlalchemy
+
+from coolrepo.repository.abc import ABCRepository
+from coolrepo.tools.func import classproperty
+from coolrepo.tools.magic import get_generic_arguments
 
 
 Model = typing.TypeVar("Model")
+Repository = typing.TypeVar("Repository", bound=ABCRepository)
 P = typing.ParamSpec("P")
-T = typing.TypeVar("T")
 Ts = typing.TypeVarTuple("Ts")
 
 
 def queryset_builder(
-    func: typing.Callable[typing.Concatenate[T, P], sqlalchemy.Select[tuple[*Ts]]],
-) -> typing.Callable[typing.Concatenate[T, P], T]:
-    def wrapper(self: T, *args: P.args, **kwargs: P.kwargs):
-        if not hasattr(self, "queryset"):
-            raise RuntimeError(
-                f"Cannot build query. Queryset is undefined in {self.__class__} repository"
-            )
-        queryset = func(self, *args, **kwargs)
-        setattr(self, "queryset", queryset)
+    func: typing.Callable[typing.Concatenate[Repository, P], sqlalchemy.Select[tuple[*Ts]]],
+) -> typing.Callable[typing.Concatenate[Repository, P], Repository]:
+    def wrapper(self: Repository, *args: P.args, **kwargs: P.kwargs) -> Repository:
+        self.queryset = func(self, *args, **kwargs)
         return self
 
     return wrapper
 
 
-class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](abc.ABC):
-    model: type[Model]
+class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](ABCRepository):
     pk_field_name: str = "uuid"
 
-    def __init__(self):
-        self.queryset = self.select()
+    if typing.TYPE_CHECKING:
+        model: type[Model]
+    else:
+        @classproperty
+        def model(cls):
+            return get_generic_arguments(cls, BaseRepository).unwrap()[0]
 
     @classmethod
     def bind(cls, row: tuple[*Selectable]) -> DataModel:
@@ -41,7 +43,7 @@ class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](abc.
     @classmethod
     def select(cls) -> sqlalchemy.Select[tuple[*Selectable]]:
         return sqlalchemy.select(cls.model).filter()  # type: ignore
-    
+
     @queryset_builder
     def paginate(self, page: int, per_page: int) -> sqlalchemy.Select[tuple[*Selectable]]:
         return self.queryset.limit(per_page).offset((page - 1) * per_page)
@@ -53,6 +55,17 @@ class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](abc.
     @classmethod
     def create(cls, instance: Model) -> sqlalchemy.Insert:
         return sqlalchemy.insert(cls.model).values(**instance)
+
+    @property
+    def queryset(self) -> sqlalchemy.Select[tuple[*Selectable]]:
+        return self._queryset
+
+    @queryset.setter
+    def queryset(self, value: sqlalchemy.Select[tuple[*Selectable]], /) -> None:
+        self._queryset = value
+
+    def __init__(self) -> None:
+        self._queryset = self.select()
 
     def update(self, **values: typing.Any) -> sqlalchemy.Update:
         select_ids = self.queryset.with_only_columns(getattr(self.model, self.pk_field_name)).scalar_subquery()
@@ -66,3 +79,6 @@ class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](abc.
     
     def all(self) -> typing.Self:
         return self
+
+
+__all__ = ("BaseRepository", "queryset_builder")

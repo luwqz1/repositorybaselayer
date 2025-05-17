@@ -1,19 +1,19 @@
-from .models import Client, ClientMaritalStatus
-from coolrepo import BaseRepository, queryset_builder, range_filter
+from examples.models import Client, ClientMaritalStatus
+
+from coolrepo.repository import BaseRepository, queryset_builder
+from coolrepo.filters import range_filter
 
 
 class ClientRepository(BaseRepository[Client]):
-    model = Client
-
     @queryset_builder
     def marital_status(self, marital_statuses: list[ClientMaritalStatus]):
         return self.queryset.filter(Client.marital_status.in_(marital_statuses))
-    
+
     @queryset_builder
     @range_filter
     def balance_range():
         return Client.balance
-    
+
     @queryset_builder
     @range_filter
     def created_at_range():
