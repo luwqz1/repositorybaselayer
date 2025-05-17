@@ -2,8 +2,6 @@
 
 ```python
 class ClientRepository(BaseRepository[Client]):
-    model = Client
-
     @queryset_builder
     def marital_status(self, marital_statuses: list[ClientMaritalStatus]):
         return self.queryset.filter(Client.marital_status.in_(marital_statuses))
@@ -35,5 +33,4 @@ def find_boyfriend():
 
     for boyfriend in first_page:
         print(boyfriend)
-
 ```
