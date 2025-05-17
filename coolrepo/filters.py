@@ -1,17 +1,38 @@
+from __future__ import annotations
+
 import typing
 
+if typing.TYPE_CHECKING:
+    from sqlalchemy.orm.attributes import QueryableAttribute
+    from sqlalchemy.sql.selectable import Select
+    from coolrepo.repository.abc import ABCRepository
+
 type Numeric = int | float
+type RangeFilter[Repository: ABCRepository] = typing.Callable[
+    [Repository, Numeric | None, Numeric | None],
+    typing.Any,
+]
 
 
-def range_filter[R, Field](
+def range_filter[Repository: ABCRepository, Field: QueryableAttribute](
     func: typing.Callable[[], Field],
-) -> typing.Callable[[R, Numeric | None, Numeric | None], typing.Any]:  # type: ignore
-    def wrapper(self: R, gte: Numeric | None = None, lte: Numeric | None = None):  # type: ignore
+) -> RangeFilter[Repository]:
+    def wrapper(
+        self: Repository,
+        gte: Numeric | None = None,
+        lte: Numeric | None = None,
+    ) -> Select[typing.Any]:
         field = func()
-        qs = getattr(self, "queryset")
+        qs = self.queryset
+
         if gte is not None:
-            qs = qs.filter(field >= gte)  # type: ignore
+            qs = qs.filter(field >= gte)
         if lte is not None:
-            qs = qs.filter(field <= lte)  # type: ignore
+            qs = qs.filter(field <= lte)
+
         return qs
+
     return wrapper
+
+
+__all__ = ("range_filter",)
