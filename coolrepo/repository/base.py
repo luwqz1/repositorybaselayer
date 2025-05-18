@@ -2,9 +2,11 @@ import typing
 
 import sqlalchemy
 
+
 from coolrepo.repository.abc import ABCRepository
 from coolrepo.tools.func import classproperty
 from coolrepo.tools.magic import get_generic_arguments
+from coolrepo.join import Join, join_all
 
 
 Model = typing.TypeVar("Model")
@@ -26,6 +28,9 @@ def queryset_builder(
 class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](ABCRepository):
     pk_field_name: str = "uuid"
 
+    outerjoins: tuple[typing.Any | Join, ...] = ()
+    innerjoins: tuple[typing.Any | Join, ...] = ()
+
     if typing.TYPE_CHECKING:
         model: type[Model]
     else:
@@ -35,10 +40,7 @@ class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](ABCR
 
     @classmethod
     def bind(cls, row: tuple[*Selectable]) -> DataModel:
-        dct = {}
-        for i, column in enumerate(sqlalchemy.inspect(cls.model).c):  # type: ignore
-            dct[column.name] = row[i]
-        return cls.model(**dct)  # type: ignore
+        return row[0]  # type: ignore
 
     @classmethod
     def select(cls) -> sqlalchemy.Select[tuple[*Selectable]]:
@@ -46,7 +48,7 @@ class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](ABCR
 
     @queryset_builder
     def paginate(self, page: int, per_page: int) -> sqlalchemy.Select[tuple[*Selectable]]:
-        return self.queryset.limit(per_page).offset((page - 1) * per_page)
+        return self.queryset.order_by(getattr(self.model, self.pk_field_name).asc()).limit(per_page).offset((page - 1) * per_page)
 
     @queryset_builder
     def get(self, uuid: str) -> sqlalchemy.Select[tuple[*Selectable]]:
@@ -66,6 +68,7 @@ class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](ABCR
 
     def __init__(self) -> None:
         self._queryset = self.select()
+        self._queryset = join_all(self._queryset, self.outerjoins, self.innerjoins)
 
     def update(self, **values: typing.Any) -> sqlalchemy.Update:
         select_ids = self.queryset.with_only_columns(getattr(self.model, self.pk_field_name)).scalar_subquery()
@@ -75,7 +78,13 @@ class BaseRepository[Model, DataModel = Model, *Selectable = *tuple[Model]](ABCR
         return sqlalchemy.select(sqlalchemy.exists(self.queryset))
     
     def count(self) -> sqlalchemy.Select[tuple[int]]:
-        return self.queryset.with_only_columns(sqlalchemy.func.count())
+        subq = self.queryset.subquery()
+        pk_col = getattr(subq.c, self.pk_field_name) 
+        return sqlalchemy.select(sqlalchemy.func.count(sqlalchemy.func.distinct(pk_col)))
+    
+    def delete(self) -> sqlalchemy.Delete[Model]:
+        select_ids = self.queryset.with_only_columns(getattr(self.model, self.pk_field_name)).scalar_subquery()
+        return sqlalchemy.delete(self.model).where(getattr(self.model, self.pk_field_name).in_(select_ids))
     
     def all(self) -> typing.Self:
         return self
