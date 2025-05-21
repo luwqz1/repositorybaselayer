@@ -46,6 +46,9 @@ class BaseRepository[DataModel, *Columns](abc.ABC, Selectable[*Columns], Bindabl
     def exists(self) -> sqlalchemy.Select[tuple[bool]]:
         return sqlalchemy.select(sqlalchemy.exists(self.queryset))
     
+    def count(self) -> sqlalchemy.Select[tuple[int]]:
+        return sqlalchemy.select(sqlalchemy.func.count()).select_from(self.queryset.subquery())
+    
     def all(self) -> typing.Self:
         return self
 
