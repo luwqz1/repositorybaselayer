@@ -8,12 +8,12 @@ class ClientRepository(BaseRepository[Client]):
     
     @queryset_builder
     @range_filter
-    def balance_range():
+    def balance_range(self):
         return Client.balance
     
     @queryset_builder
     @range_filter
-    def created_at_range():
+    def created_at_range(self):
         return Client.created_at
 
 
@@ -21,7 +21,7 @@ def find_boyfriend():
     qs = (
         ClientRepository()
         .marital_status([ClientMaritalStatus.SINGLE, ClientMaritalStatus.DIVORCED])
-        .balance_range(1_000_000, None)
+        .balance_range(min=1_000_000)
         .all()
     )
 

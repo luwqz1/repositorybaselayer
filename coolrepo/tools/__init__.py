@@ -1,4 +1,4 @@
-from coolrepo.tools.func import classproperty
+from coolrepo.tools.misc import classproperty
 from coolrepo.tools.functional import from_optional
 from coolrepo.tools.magic import (
     get_generic_arguments,

@@ -5,32 +5,28 @@ import typing
 if typing.TYPE_CHECKING:
     from sqlalchemy.orm.attributes import QueryableAttribute
     from sqlalchemy.sql.selectable import Select
-    from coolrepo.repository.abc import ABCRepository
+    from coolrepo.repository.proto import AnySelectable
 
-type Numeric = int | float
-type RangeFilter[Repository: ABCRepository] = typing.Callable[
-    [Repository, Numeric | None, Numeric | None],
-    typing.Any,
-]
+from coolrepo.types import Comparable
 
 
-def range_filter[Repository: ABCRepository, Field: QueryableAttribute](
-    func: typing.Callable[[], Field],
-) -> RangeFilter[Repository]:
+def range_filter[Self: AnySelectable, Field: QueryableAttribute[typing.Any]](
+    func: typing.Callable[[Self], Field],
+):
     def wrapper(
-        self: Repository,
-        gte: Numeric | None = None,
-        lte: Numeric | None = None,
+        self: Self,
+        min: Comparable | None = None,
+        max: Comparable | None = None,
     ) -> Select[typing.Any]:
-        field = func()
+        field = func(self)
         qs = self.queryset
 
-        if gte is not None:
-            qs = qs.filter(field >= gte)
-        if lte is not None:
-            qs = qs.filter(field <= lte)
+        if min is not None:
+            qs = qs.filter(field >= min)
+        if max is not None:
+            qs = qs.filter(field <= max)
 
-        return qs
+        return qss
 
     return wrapper
 

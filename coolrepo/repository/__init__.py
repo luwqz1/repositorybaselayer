@@ -1,4 +1,5 @@
-from coolrepo.repository.abc import ABCRepository
+from coolrepo.repository.proto import Selectable, Bindable
 from coolrepo.repository.base import BaseRepository, queryset_builder
+from coolrepo.repository.model import ModelRepository
 
-__all__ = ("ABCRepository", "BaseRepository", "queryset_builder")
+__all__ = ("Selectable", "Bindable", "BaseRepository", "queryset_builder", "ModelRepository")
