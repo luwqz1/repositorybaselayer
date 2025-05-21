@@ -26,7 +26,7 @@ def range_filter[Self: AnySelectable, Field: QueryableAttribute[typing.Any]](
         if max is not None:
             qs = qs.filter(field <= max)
 
-        return qss
+        return qs
 
     return wrapper
 

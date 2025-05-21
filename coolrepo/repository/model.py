@@ -26,12 +26,10 @@ class ModelRepository[Model, DataModel = Model, *Columns = *tuple[Model]](BaseRe
         super().__init__()
         self._queryset = join_all(self._queryset, self.outerjoins, self.innerjoins)
 
-    @classmethod
-    def bind(cls, columns: tuple[*Columns]) -> DataModel:  # FIXME 
+    def bind(self, *columns: *tuple[*Columns]) -> DataModel:  # FIXME 
         return columns[0]  # type: ignore
 
-    @classmethod
-    def select(cls) -> sqlalchemy.Select[tuple[*Columns]]:
+    def select(self) -> sqlalchemy.Select[tuple[*Columns]]:
         return sqlalchemy.select(cls.model).filter()  # type: ignore
 
     @queryset_builder

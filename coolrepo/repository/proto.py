@@ -15,8 +15,7 @@ class Selectable[*Columns](typing.Protocol):
 
 
 class Bindable[DataModel, *Columns](typing.Protocol):
-    @classmethod
-    def bind(cls, columns: tuple[*Columns]) -> DataModel:
+    def bind(self, *columns: *tuple[*Columns]) -> DataModel:
         ...
 
 

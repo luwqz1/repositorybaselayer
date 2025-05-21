@@ -24,14 +24,12 @@ def queryset_builder(
 
 
 class BaseRepository[DataModel, *Columns](abc.ABC, Selectable[*Columns], Bindable[DataModel, *Columns]):
-    @classmethod
     @abc.abstractmethod
-    def select(cls) -> sqlalchemy.Select[tuple[*Columns]]:
+    def select(self) -> sqlalchemy.Select[tuple[*Columns]]:
         ...
     
-    @classmethod
     @abc.abstractmethod
-    def bind(cls, columns: tuple[*Columns]) -> DataModel:
+    def bind(self, *columns: *tuple[*Columns]) -> DataModel:
         ...
 
     @property
