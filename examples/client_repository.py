@@ -2,6 +2,12 @@ from examples.models import Client, ClientMaritalStatus
 
 from coolrepo.repository import ModelRepository, queryset_builder
 from coolrepo.filters import range_filter
+from coolrepo.fetch import fetch_scalar, fetch_many
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+session: AsyncSession  # SET ME
 
 
 class ClientRepository(ModelRepository[Client]):
@@ -28,5 +34,24 @@ async def find_boyfriend():
         .all()
     )
 
-    all_count_qs = qs.count()
-    first_page_qs = qs.paginate(1, 10).queryset
+    count = await fetch_scalar(session, qs.count())
+
+    page, per_page = 1, 10
+
+    while page <= (count // per_page):
+        if page > 1:
+            input("\nPress enter for next page >")
+        
+        boyfriend_page = await fetch_many(session, qs.paginate(page, per_page))
+
+        print(f"\nThere are {count} available boyfriends")
+        print("Printing first page:\n\n---")
+
+        for boyfriend in boyfriend_page:
+            print(boyfriend)
+        
+        print("---\n\n")
+
+        page += 1
+
+    print("All available boyfriends printed.")
