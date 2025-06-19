@@ -1,4 +1,4 @@
-from coolrepo.repository.base import BaseRepository
+from rbl.repository.base import BaseRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from fntypes import Option, Some, Nothing
 import sqlalchemy

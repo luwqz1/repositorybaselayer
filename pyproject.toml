@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "coolrepo"
+name = "repositor"
 version = "0.0.1"
-description = "Cool repo utility for sqlalchemy"
+description = "repository library for sqlalchemy"
 authors = ["timoniq <arseny.kriuchkov@gmail.com>"]
 license = "MIT"
 readme = "README.md"

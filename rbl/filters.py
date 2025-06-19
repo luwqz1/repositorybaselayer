@@ -5,9 +5,9 @@ import typing
 if typing.TYPE_CHECKING:
     from sqlalchemy.orm.attributes import QueryableAttribute
     from sqlalchemy.sql.selectable import Select
-    from coolrepo.repository.proto import AnySelectable
+    from rbl.repository.proto import AnySelectable
 
-from coolrepo.types import Comparable
+from rbl.types import Comparable
 
 
 def range_filter[Self: AnySelectable, Field: QueryableAttribute[typing.Any]](

@@ -4,7 +4,7 @@ import typing
 from fntypes.tools.unwrapping import unwrapping
 from fntypes.option import Nothing, Option, Some
 
-from coolrepo.tools.functional import from_optional
+from rbl.tools.functional import from_optional
 
 
 def get_origin_bases(cls: type[typing.Any], /) -> Option[tuple[typing.Any]]:

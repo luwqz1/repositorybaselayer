@@ -1,8 +1,8 @@
 from examples.models import Client, ClientMaritalStatus
 
-from coolrepo.repository import ModelRepository, queryset_builder
-from coolrepo.filters import range_filter
-from coolrepo.fetch import fetch_scalar, fetch_many
+from rbl.repository import ModelRepository, queryset_builder
+from rbl.filters import range_filter
+from rbl.fetch import fetch_scalar, fetch_many
 
 from sqlalchemy.ext.asyncio import AsyncSession
 

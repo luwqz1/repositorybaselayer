@@ -1,7 +1,25 @@
-# coolrepo
+# RBL - repository base layer
+
+This library is designed to help you build beautiful repository classes for SQLAlchemy-based projects.
+
+With this instrument you can create convenient repository classes that support changing your query with self-implemented filters that will be applied in a builder style.
 
 ```python
-class ClientRepository(BaseRepository[Client]):
+qs = UserRepository().has_permission("admin").online_at(min=now() - timedelta(minutes=30))
+```
+
+The utility is scalable enough to work on top of any kind of select statement. Supported stack is meant to be expanded in the future.
+
+## What RBL offers
+
+* `ModelRepository` - the base class to easily apply eager joins when selecting from a specific model
+* `BaseRepository` - the base class that can rest on top of any base select expression that you have to provide manually
+* A set of useful filter constructors that really help you to save a big bit of time
+
+## Example
+
+```python
+class ClientRepository(ModelRepository[Client]):
     @queryset_builder
     def marital_status(self, marital_statuses: list[ClientMaritalStatus]):
         return self.queryset.filter(Client.marital_status.in_(marital_statuses))
@@ -34,3 +52,8 @@ async def find_boyfriend():
     for boyfriend in first_page:
         print(boyfriend)
 ```
+
+## Docs
+
+Soon. For now see [examples](/examples/)
+

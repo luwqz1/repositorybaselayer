@@ -1,9 +1,9 @@
 from .base import BaseRepository, queryset_builder
 
-from coolrepo.tools.misc import classproperty
-from coolrepo.tools.magic import get_generic_arguments
-from coolrepo.join import Join, join_all
-from coolrepo.types import Field
+from rbl.tools.misc import classproperty
+from rbl.tools.magic import get_generic_arguments
+from rbl.join import Join, join_all
+from rbl.types import Field
 
 
 import typing
