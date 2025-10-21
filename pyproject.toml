@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "repositor"
+name = "rbl"
 version = "0.0.1"
 description = "repository library for sqlalchemy"
 authors = ["timoniq <arseny.kriuchkov@gmail.com>"]
